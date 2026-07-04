@@ -1,0 +1,43 @@
+// File: firestore.rules
+// App: Enthusia
+// Description: Security rules for Cloud Firestore. Locks down access so
+// each user can only read/write their own data tree at users/{their_uid}/...
+// Anyone not signed in is denied. Anyone signed in but trying to access
+// another user's data is denied.
+//
+// Deployment: copy contents into Firebase Console → Firestore → Rules tab
+// → Publish. Or use `firebase deploy --only firestore:rules` if Firebase
+// CLI is set up in the project.
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User documents: users/{uid}
+    // Only the user themselves can read/write their own profile.
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+
+      // Task subcollection: users/{uid}/tasks/{taskId}
+      // Only the user themselves can read/write their tasks.
+      match /tasks/{taskId} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == userId;
+      }
+
+      // Completion subcollection: users/{uid}/completions/{YYYY-MM-DD}
+      // Only the user themselves can read/write their completions.
+      match /completions/{dateKey} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == userId;
+      }
+    }
+
+    // Default deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
