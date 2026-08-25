@@ -1,8 +1,8 @@
 // File: lib/features/settings/settings_screen.dart
 // App: Enthusia
 // Author: Sandro
-// Date: 2026-07-04
-// Version: 0.27
+// Date: 2026-08-01
+// Version: 0.33
 // Description: Settings screen. Shows profile, preferences toggles
 // (Notifications, Dark mode), about links (Rate, Privacy), Sign Out and
 // Delete Account buttons. Reuses bottom nav.
@@ -45,8 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _openPrivacyPolicy() async {
-    // Placeholder URL — replace with real hosted privacy policy before Play Store submission.
-    final url = Uri.parse('https://enthusia.app/privacy');
+    final url = Uri.parse('https://sandrobit56.github.io/enthusia-privacy/');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
