@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:151883420402:android:2388d82ee7551fa850366b",
+        "android_client_info": {
+          "package_name": "com.enthusia.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAusr1v4FHIV-KdTlpHSUEmcLG4r-vPByc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:151883420402:android:7feed556d2dd6f8650366b",
         "android_client_info": {
           "package_name": "com.enthusia.enthusia"
