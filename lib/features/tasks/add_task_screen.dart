@@ -182,13 +182,27 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(
-                        Icons.close,
-                        size: 24,
-                        color: AppColors.headingDark,
-                      ),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(
+                          Icons.close,
+                          size: 24,
+                          color: AppColors.headingDark,
+                        ),
+                        // Invisible 48x48-minimum tap zone, independent of
+                        // the visible icon's size (Material touch target).
+                        Positioned.fill(
+                          top: -12,
+                          bottom: -12,
+                          left: -12,
+                          right: -12,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => Navigator.of(context).pop(),
+                          ),
+                        ),
+                      ],
                     ),
                     Expanded(
                       child: Center(

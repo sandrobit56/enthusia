@@ -249,26 +249,40 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: AppSpacing.l),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.arrow_back,
-                            size: 16,
-                            color: AppColors.headingMid,
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            'back',
-                            style: AppTextStyles.body.copyWith(
-                              fontWeight: FontWeight.w700,
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.arrow_back,
+                              size: 16,
                               color: AppColors.headingMid,
                             ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              'back',
+                              style: AppTextStyles.body.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.headingMid,
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Invisible 48x48-minimum tap zone, independent of
+                        // the visible label's size (Material touch target).
+                        Positioned.fill(
+                          top: -12,
+                          bottom: -12,
+                          left: -12,
+                          right: -12,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => Navigator.of(context).pop(),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.l),
                     Container(

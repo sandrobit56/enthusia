@@ -29,6 +29,13 @@ class TaskService extends ChangeNotifier {
   bool _isLoading = true;
   bool _firstSnapshotReceived = false;
 
+  /// Optimistic completion state for tasks with a toggle currently in
+  /// flight, keyed by task id. Wins over [_completedTodayIds] until the
+  /// Firestore stream confirms the same value. Also doubles as the
+  /// in-flight guard: a task id present here means a toggle is already
+  /// pending, so a second tap on it is ignored (see [toggleComplete]).
+  final Map<String, bool> _pendingOverrides = {};
+
   StreamSubscription<List<Task>>? _tasksSubscription;
   StreamSubscription<Set<String>>? _completionSubscription;
   StreamSubscription<User?>? _authSubscription;
@@ -40,7 +47,8 @@ class TaskService extends ChangeNotifier {
     return _tasks.where((task) => task.recurrence.appliesOn(date, task.createdAt)).toList();
   }
 
-  bool isCompletedToday(String taskId) => _completedTodayIds.contains(taskId);
+  bool isCompletedToday(String taskId) =>
+      _pendingOverrides[taskId] ?? _completedTodayIds.contains(taskId);
 
   /// Add a task. Writes to Firestore. If the task has a reminder set and enabled,
   /// schedules a daily notification using the Firestore-assigned doc ID.
@@ -80,9 +88,29 @@ class TaskService extends ChangeNotifier {
     await FirestoreService.instance.deleteTask(taskId);
   }
 
-  /// Toggle today's completion for a task. Persisted to Firestore.
+  /// Toggle today's completion for a task. Flips the visible state
+  /// instantly via [_pendingOverrides] instead of waiting on the Firestore
+  /// transaction's network round-trip, then persists in the background.
+  /// A second tap while one is already in flight for this task is ignored
+  /// — this prevents overlapping transactions from racing and canceling
+  /// each other out.
   Future<void> toggleComplete(String taskId) async {
-    await FirestoreService.instance.toggleTodayCompletion(taskId);
+    if (_pendingOverrides.containsKey(taskId)) return;
+
+    final optimisticValue = !isCompletedToday(taskId);
+    _pendingOverrides[taskId] = optimisticValue;
+    notifyListeners();
+
+    try {
+      await FirestoreService.instance.toggleTodayCompletion(taskId);
+      // Left in _pendingOverrides on success: the completion stream
+      // listener clears it once the server-confirmed value matches, which
+      // avoids a flicker back to the stale state in between.
+    } catch (e) {
+      debugPrint('TaskService toggleComplete error: $e');
+      _pendingOverrides.remove(taskId);
+      notifyListeners();
+    }
   }
 
   void _startListening() {
@@ -111,6 +139,12 @@ class TaskService extends ChangeNotifier {
     _completionSubscription = FirestoreService.instance.todayCompletionsStream().listen(
       (ids) {
         _completedTodayIds = ids;
+        // A pending override is only still needed until the server value
+        // it predicted actually arrives — once it does, drop it so
+        // _completedTodayIds (now equally correct) takes back over.
+        _pendingOverrides.removeWhere(
+          (taskId, optimisticValue) => ids.contains(taskId) == optimisticValue,
+        );
         notifyListeners();
       },
       onError: (error) {
@@ -128,6 +162,7 @@ class TaskService extends ChangeNotifier {
     _completionSubscription = null;
     _tasks = [];
     _completedTodayIds = <String>{};
+    _pendingOverrides.clear();
     _isLoading = false;
     notifyListeners();
   }

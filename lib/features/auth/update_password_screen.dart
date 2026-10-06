@@ -81,35 +81,49 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                 const SizedBox(height: AppSpacing.l),
 
                 // Back pill
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    height: 44,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.m,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.card,
-                      borderRadius: BorderRadius.circular(48),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.arrow_back,
-                            size: 16, color: Color(0xFF77777D)),
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          'back',
-                          style: AppTextStyles.body.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF77777D),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.m,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(48),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.arrow_back,
+                              size: 16, color: Color(0xFF77777D)),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            'back',
+                            style: AppTextStyles.body.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF77777D),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                    // Invisible 48x48-minimum tap zone, independent of
+                    // the visible pill's size (Material touch target).
+                    Positioned.fill(
+                      top: -12,
+                      bottom: -12,
+                      left: -12,
+                      right: -12,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: AppSpacing.l),
